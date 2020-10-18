@@ -64,6 +64,14 @@ classdef Drone < handle
         KD_zdot
     end
     
+    properties
+        kq
+        kt
+        uRm
+        mRu
+        omega
+    end
+    
     
 %% METHODS
     methods
@@ -73,6 +81,9 @@ classdef Drone < handle
             obj.t = 0.0;
             obj.dt = 0.01;
             obj.tf = simTime;
+            
+            obj.kq = 2.74e-7;
+            obj.kt = 1.75e-5;
             
             obj.m = params('mass');
             obj.l = params('armLength');
@@ -235,6 +246,29 @@ classdef Drone < handle
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
         end
+        
+        function trustcmd(obj)
+            %obj.omega = obj.mRu * obj.u
+            obj.kq;
+            obj.kt;
+            obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
+            obj.mRu = inv(obj.uRm);
+            
+            obj.u;
+            obj.omega = obj.mRu * obj.u;
+            obj.omega;
+            
+            %Stopping one motor
+            obj.omega(3) = 0;
+            obj.omega;
+            obj.u = obj.uRm * obj.omega;
+            obj.u;
+            
+            obj.T = obj.u(1);
+            obj.M = obj.u(2:4);
+     
+        end
+        
     end
 end
 

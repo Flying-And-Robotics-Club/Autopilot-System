@@ -104,13 +104,18 @@ grid on;
 hold on;
 
 %% Main Loop
-commandSig(1) = -10.0*D2R; %phi
-commandSig(2) = 10.0*D2R; %theta
-commandSig(3) = 10.0*D2R; %psi
-commandSig(4) = 1.0; %zdot
-for i = 1:simulationTime/0.01
+commandSig(1) = 0 %10.0*D2R; %phi
+commandSig(2) = 0 %10.0*D2R; %theta
+commandSig(3) = 0 %10.0*D2R; %psi
+commandSig(4) = 0 %1.0; %zdot
+for i = 1:simulationTime/0.01 %0.01
     %% Take a step
-    drone1.AttitudeCtrl(commandSig);
+    i
+    if i>20
+        drone1.trustcmd();
+    else
+        drone1.AttitudeCtrl(commandSig);
+    end
     drone1.UpdateState();
 	
 	drone1_state = drone1.GetState();
