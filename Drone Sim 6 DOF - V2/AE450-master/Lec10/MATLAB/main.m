@@ -108,11 +108,14 @@ commandSig(1) = 0 %10.0*D2R; %phi
 commandSig(2) = 0 %10.0*D2R; %theta
 commandSig(3) = 0 %10.0*D2R; %psi
 commandSig(4) = 0 %1.0; %zdot
-for i = 1:simulationTime/0.01 %0.01
+for i = 1:50 %simulationTime/0.01 %0.01
     %% Take a step
     i
     if i>20
         drone1.trustcmd();
+            drone1.updatemotorspeed(2,1.1);
+            drone1.updatemotorspeed(4,1.1);
+            drone1.updatemotorspeed(3,1.1);
     else
         drone1.AttitudeCtrl(commandSig);
     end

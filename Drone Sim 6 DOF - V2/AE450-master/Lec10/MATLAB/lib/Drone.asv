@@ -251,14 +251,14 @@ classdef Drone < handle
             %obj.omega = obj.mRu * obj.u
             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
             obj.mRu = inv(obj.uRm);
-            
-            obj.u = [obj.T;obj.M];
 
             obj.omega = obj.mRu * obj.u;
             
             %Stopping one motor
-            obj.omega(1) = 0;
+            obj.omega(3) = 0;
+            obj.omega;
             obj.u = obj.uRm * obj.omega;
+            obj.u;
             
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
@@ -270,17 +270,13 @@ classdef Drone < handle
             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
             obj.mRu = inv(obj.uRm);
             
-            
-            obj.u = [obj.T;obj.M];
             obj.omega = obj.mRu * obj.u;
-            obj.omega
             
             obj.omega = sqrt(obj.omega);
             obj.omega(num) = obj.omega(num)*gain;
             
             obj.omega = obj.omega .^ 2;
             obj.u = obj.uRm * obj.omega;
-            obj.omega
             
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
