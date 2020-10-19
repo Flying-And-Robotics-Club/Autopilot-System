@@ -70,6 +70,8 @@ classdef Drone < handle
         uRm
         mRu
         omega
+        force
+        rho
     end
     
     
@@ -286,6 +288,85 @@ classdef Drone < handle
             obj.M = obj.u(2:4);
             
         end
+        
+        function atinstant20(obj)
+            obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
+            obj.mRu = inv(obj.uRm);
+            
+            obj.u = [obj.T;obj.M];
+
+            obj.omega = obj.mRu * obj.u;
+            obj.force = obj.kt .* obj.omega;
+                       
+            %Stopping one motor
+            obj.force(1) = 0;
+            
+            obj.omega = obj.force ./ obj.kt;
+            obj.u = obj.uRm * obj.omega;
+            
+            obj.T = obj.u(1);
+            obj.M = obj.u(2:4);
+        end
+        function pqr = getpqr(obj)
+            pqr = obj.w;
+        end
+            
+        function atinstant25(obj)
+            obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
+            obj.mRu = inv(obj.uRm);
+            
+            obj.u = [obj.T;obj.M];
+
+            obj.omega = obj.mRu * obj.u;
+            obj.force = obj.kt .* obj.omega;
+            
+            
+            obj.force(1) = 0;
+            obj.force(2) = obj.m * obj.g / 2;
+            obj.force(4) = obj.force(2);
+            obj.force(3) = 0;
+            
+            obj.omega = obj.force ./ obj.kt;
+            obj.u = obj.uRm * obj.omega;
+            
+            obj.T = obj.u(1);
+            obj.M = obj.u(2:4);
+            obj.w;
+            sqrt(obj.w(1).^2 + obj.w(2).^2);
+        end
+        
+        function tunning(obj)
+             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
+            obj.mRu = inv(obj.uRm);
+            
+            obj.u = [obj.T;obj.M];
+
+            obj.omega = obj.mRu * obj.u;
+            obj.force = obj.kt .* obj.omega;
+            
+            
+            rho = 0;
+            obj.force(1) = 0;
+            obj.force(2) = obj.m * obj.g / (rho + 2);
+            obj.force(4) = obj.force(2);
+            obj.force(3) = rho * obj.force(2);
+            
+            
+            
+%             obj.force(1) = 0;
+%             obj.force(2) = obj.m * obj.g / 2;
+%             obj.force(4) = obj.force(2);
+%             obj.force(3) = 0;
+            
+            obj.omega = obj.force ./ obj.kt;
+            obj.u = obj.uRm * obj.omega;
+            
+            obj.u(1) - obj.m * obj.g
+            
+            obj.T = obj.u(1);
+            obj.M = obj.u(2:4);
+        end
+            
     end
 end
 

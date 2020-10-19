@@ -52,7 +52,7 @@ fig1.CurrentAxes.YDir = 'Reverse';
 % view([270 90]) % Top view
 axis equal;
 grid on;
-xlim([-5 5]);
+xlim([-1 10]);
 ylim([-5 5]);
 zlim([-8 0]);
 xlabel('X[m]');
@@ -103,19 +103,41 @@ title('Zdot[m/s]')
 grid on;
 hold on;
 
+
 %% Main Loop
 commandSig(1) = 0 %10.0*D2R; %phi
 commandSig(2) = 0 %10.0*D2R; %theta
 commandSig(3) = 0 %10.0*D2R; %psi
 commandSig(4) = 0 %1.0; %zdot
-for i = 1:50 %simulationTime/0.01 %0.01
+for i = 1:simulationTime/0.01 %0.01
     %% Take a step
     i
-    if i>20
-        drone1.trustcmd();
-            drone1.updatemotorspeed(2,1.1);
-            drone1.updatemotorspeed(4,1.1);
-            drone1.updatemotorspeed(3,1.1);
+    start = 0;
+    if i>=20
+        if i<=25
+            drone1.atinstant20();
+        else
+            if i<=40
+                drone1.atinstant25();
+            else
+                drone1.tunning();
+            end
+        end
+        
+%         if i<30
+%             drone1.atinstant20(0);
+%         else
+%             drone1.atinstant20(1);
+%         end
+%         if i<=23
+%         drone1.atinstant20();
+%         end
+%         drone1.atinstant23();
+%         if i<23
+%             drone1.atinstant20();
+%         else
+%             drone1.atinstant23();
+%         end
     else
         drone1.AttitudeCtrl(commandSig);
     end
