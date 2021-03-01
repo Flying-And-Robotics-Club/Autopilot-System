@@ -1,5 +1,5 @@
 classdef Drone < handle
-    
+   
 %% MEMBERS    
     properties
         g
@@ -72,6 +72,9 @@ classdef Drone < handle
         omega
         force
         rho
+        k0
+        k1
+        k2
     end
     
     
@@ -86,6 +89,8 @@ classdef Drone < handle
             
             obj.kq = 2.74e-7;
             obj.kt = 1.75e-5;
+            obj.k1=1.1;
+                        obj.rho = 0.06;
             
             obj.m = params('mass');
             obj.l = params('armLength');
@@ -275,7 +280,7 @@ classdef Drone < handle
             
             obj.u = [obj.T;obj.M];
             obj.omega = obj.mRu * obj.u;
-            obj.omega
+            obj.omega;
             
             obj.omega = sqrt(obj.omega);
             obj.omega(num) = obj.omega(num)*gain;
@@ -289,7 +294,7 @@ classdef Drone < handle
             
         end
         
-        function atinstant20(obj)
+        function f = atinstant20(obj)
             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
             obj.mRu = inv(obj.uRm);
             
@@ -301,6 +306,7 @@ classdef Drone < handle
             %Stopping one motor
             obj.force(1) = 0;
             
+            f = obj.force;
             obj.omega = obj.force ./ obj.kt;
             obj.u = obj.uRm * obj.omega;
             
@@ -311,7 +317,7 @@ classdef Drone < handle
             pqr = obj.w;
         end
             
-        function atinstant25(obj)
+        function f = atinstant25(obj)
             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
             obj.mRu = inv(obj.uRm);
             
@@ -320,22 +326,52 @@ classdef Drone < handle
             obj.omega = obj.mRu * obj.u;
             obj.force = obj.kt .* obj.omega;
             
-            
+            obj.k0=1;
             obj.force(1) = 0;
-            obj.force(2) = obj.m * obj.g / 2;
+            obj.force(2) = obj.k0*obj.m * obj.g / 2;
             obj.force(4) = obj.force(2);
             obj.force(3) = 0;
             
+            f = obj.force;
             obj.omega = obj.force ./ obj.kt;
             obj.u = obj.uRm * obj.omega;
             
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
-            obj.w;
-            sqrt(obj.w(1).^2 + obj.w(2).^2);
         end
         
-        function tunning(obj)
+        function f = tunning1(obj)
+             obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
+            obj.mRu = inv(obj.uRm);
+            
+            obj.u = [obj.T;obj.M];
+
+            obj.omega = obj.mRu * obj.u;
+            obj.force = obj.kt .* obj.omega;
+            obj.rho = 0.123;
+            obj.k1 = 2;
+            
+            obj.force(1) = 0;
+            obj.force(2) = obj.k1* obj.m * obj.g / (obj.rho + 2);
+            obj.force(4) = obj.force(2);
+            obj.force(3) = obj.rho * obj.force(2);
+            
+            
+%             obj.force(1) = 0;
+%             obj.force(2) = obj.m * obj.g / 2;
+%             obj.force(4) = obj.force(2);
+%             obj.force(3) = 0;
+            f = obj.force;
+%             obj.rho = obj.rho + 0.01;
+            obj.omega = obj.force ./ obj.kt;
+            obj.u = obj.uRm * obj.omega;
+            
+            obj.u(1) = obj.m * obj.g;
+            
+            obj.T = obj.u(1);
+            obj.M = obj.u(2:4);
+        end
+             function f = tunning2(obj)
              obj.uRm = [obj.kt obj.kt obj.kt obj.kt; 0 obj.kt*obj.l 0 -obj.kt*obj.l; obj.kt*obj.l 0 -obj.kt*obj.l 0; obj.kq -obj.kq obj.kq -obj.kq];
             obj.mRu = inv(obj.uRm);
             
@@ -345,11 +381,12 @@ classdef Drone < handle
             obj.force = obj.kt .* obj.omega;
             
             
-            rho = 0;
+            obj.rho = 0.01;
+            obj.k2=2;
             obj.force(1) = 0;
-            obj.force(2) = obj.m * obj.g / (rho + 2);
+            obj.force(2) = obj.k2* obj.m * obj.g / (obj.rho + 2);
             obj.force(4) = obj.force(2);
-            obj.force(3) = rho * obj.force(2);
+            obj.force(3) = obj.rho * obj.force(2)/2;
             
             
             
@@ -357,16 +394,15 @@ classdef Drone < handle
 %             obj.force(2) = obj.m * obj.g / 2;
 %             obj.force(4) = obj.force(2);
 %             obj.force(3) = 0;
-            
+            f = obj.force;
             obj.omega = obj.force ./ obj.kt;
             obj.u = obj.uRm * obj.omega;
             
-            obj.u(1) - obj.m * obj.g
+            obj.u(1) = obj.m * obj.g;
             
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
         end
-            
     end
 end
 

@@ -6,11 +6,12 @@ addpath('./lib');
 R2D = 180/pi;
 D2R = pi/180;
 
+forces = [0;0;0;0];
 %% INIT. PARAMS.
 drone1_params = containers.Map({'mass','armLength','Ixx','Iyy','Izz'},...
     {1.25, 0.265, 0.0232, 0.0232, 0.0468});
 
-drone1_initStates = [0, 0, -5, ...                                              % x, y, z
+drone1_initStates = [0, 0, -4, ...                                              % x, y, z
     0, 0, 0, ...                                                                % dx, dy, dz
     0, 0, 0, ...                                                                % phi, theta, psi
     0, 0, 0]';                                                                  % p, q, r
@@ -35,6 +36,7 @@ drone1_gains = containers.Map(...
 	0.8, 0.0, 0.3,...
 	10.0, 0.2, 0.0});
 
+
 simulationTime = 2;                                                          % [sec]
 
 %% BIRTH OF A DRONE
@@ -53,8 +55,8 @@ fig1.CurrentAxes.YDir = 'Reverse';
 axis equal;
 grid on;
 xlim([-1 10]);
-ylim([-5 5]);
-zlim([-8 0]);
+ylim([-10 10]);
+zlim([-10 0]);
 xlabel('X[m]');
 ylabel('Y[m]');
 zlabel('Height[m]');
@@ -78,30 +80,43 @@ hold(gca, 'off');
 
 %% Init. Data Fig.
 fig2 = figure('pos',[800 400 800 600]);
-subplot(2,3,1)
+subplot(3,3,1)
 title('phi[deg]')
 grid on;
 hold on;
-subplot(2,3,2)
+subplot(3,3,2)
 title('theta[deg]')
 grid on;
 hold on;
-subplot(2,3,3)
+subplot(3,3,3)
 title('psi[deg]')
 grid on;
 hold on;
-subplot(2,3,4)
+subplot(3,3,4)
 title('X[m]')
 grid on;
 hold on;
-subplot(2,3,5)
+subplot(3,3,5)
 title('Y[m]')
 grid on;
 hold on;
-subplot(2,3,6)
+subplot(3,3,6)
 title('Zdot[m/s]')
 grid on;
 hold on;
+subplot(3,3,7)
+title('f2[m/s]')
+grid on;
+hold on;
+subplot(3,3,8)
+title('f3[m/s]')
+grid on;
+hold on;
+subplot(3,3,9)
+title('f4[m/s]')
+grid on;
+hold on;
+
 
 
 %% Main Loop
@@ -112,15 +127,20 @@ commandSig(4) = 0 %1.0; %zdot
 for i = 1:simulationTime/0.01 %0.01
     %% Take a step
     i
-    start = 0;
+    drone1_state(7:8)*180/pi
+    
     if i>=20
         if i<=25
-            drone1.atinstant20();
+            forces = drone1.atinstant20()
         else
             if i<=40
-                drone1.atinstant25();
+                forces = drone1.atinstant25()
             else
-                drone1.tunning();
+                if i<=100
+                    forces = drone1.tunning1()
+                else
+                   forces = drone1.tunning2()
+                end
             end
         end
         
@@ -169,19 +189,24 @@ for i = 1:simulationTime/0.01 %0.01
     
     %% Data Plot
     figure(2)
-    subplot(2,3,1)
+    subplot(3,3,1)
         plot(i/100,drone1_state(7)*R2D,'.');
-    subplot(2,3,2)
+    subplot(3,3,2)
         plot(i/100,drone1_state(8)*R2D,'.');    
-    subplot(2,3,3)
+    subplot(3,3,3)
         plot(i/100,drone1_state(9)*R2D,'.');
-    subplot(2,3,4)
+    subplot(3,3,4)
         plot(i/100,drone1_state(1),'.');
-    subplot(2,3,5)
+    subplot(3,3,5)
         plot(i/100,drone1_state(2),'.');
-    subplot(2,3,6)
+    subplot(3,3,6)
         plot(i/100,drone1_state(6),'.');
-		
+    subplot(3,3,7)
+        plot(i/100,forces(2),'.');
+    subplot(3,3,8)
+        plot(i/100,forces(3),'.');
+    subplot(3,3,9)
+        plot(i/100,forces(4),'.');
     drawnow;
     
     
